@@ -1,6 +1,6 @@
 /*!
   * vue-router v3.6.5
-  * (c) 2022 Evan You
+  * (c) 2025 Evan You
   * @license MIT
   */
 'use strict';
@@ -3152,8 +3152,8 @@ VueRouter.isNavigationFailure = isNavigationFailure;
 VueRouter.NavigationFailureType = NavigationFailureType;
 VueRouter.START_LOCATION = START;
 
-if (inBrowser && window.Vue) {
-  window.Vue.use(VueRouter);
-}
+// if (inBrowser && window.Vue) {
+//   window.Vue.use(VueRouter)
+// }
 
 module.exports = VueRouter$1;
