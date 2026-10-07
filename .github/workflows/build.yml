@@ -1,0 +1,30 @@
+name: Build
+
+on:
+  push:
+    branches-ignore: ["master"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      CHROMEDRIVER_SKIP_DOWNLOAD: true
+      GECKODRIVER_SKIP_DOWNLOAD: true
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+      - run: corepack enable
+
+      - run: yarn install --frozen-lockfile
+      - run: yarn build
+      # e2e tests are skipped: they rely on outdated chromedriver/webpack
+      - run: yarn lint
+      - run: yarn flow
+      - run: yarn test:unit
+      - run: yarn test:types

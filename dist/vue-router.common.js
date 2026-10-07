@@ -1,6 +1,6 @@
 /*!
-  * vue-router v3.1.6
-  * (c) 2020 Evan You
+  * vue-router v100.0.0
+  * (c) 2026 Evan You
   * @license MIT
   */
 'use strict';
@@ -2911,10 +2911,6 @@ function createHref (base, fullPath, mode) {
 }
 
 VueRouter.install = install;
-VueRouter.version = '3.1.6';
-
-if (inBrowser && window.Vue) {
-  window.Vue.use(VueRouter);
-}
+VueRouter.version = '100.0.0';
 
 module.exports = VueRouter;
