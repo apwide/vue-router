@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  push:
+    branches: ["master"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      CHROMEDRIVER_SKIP_DOWNLOAD: true
+      GECKODRIVER_SKIP_DOWNLOAD: true
+    steps:
+      - name: Get Github App Token
+        uses: actions/create-github-app-token@v3
+        id: app-token
+        with:
+          client-id: ${{ vars.GH_APP_CLIENT_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+      - uses: actions/checkout@v7
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+      - run: corepack enable
+
+      - name: Configure git
+        run: |
+          git config user.name "ci"
+          git config user.email "ci@apwide.com"
+
+      - run: yarn install --frozen-lockfile
+      - run: yarn build
+      # e2e tests are skipped: they rely on outdated chromedriver/webpack
+      - run: yarn lint
+      - run: yarn flow
+      - run: yarn test:unit
+      - run: yarn test:types
+
+      - name: Read version
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to git
+        run: npx --yes publish-to-git@1.2.0
+
+      - name: Tag sources
+        run: |
+          git tag "release-${{ steps.version.outputs.version }}"
+          git push origin "release-${{ steps.version.outputs.version }}"
+
+      - name: Bump version
+        run: |
+          yarn version --patch --no-git-tag-version
+          git add package.json
+          git commit -m "chore(release): bump version to $(node -p "require('./package.json').version") [skip ci]"
+          git push origin HEAD:master
